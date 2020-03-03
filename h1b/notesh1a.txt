@@ -1,0 +1,59 @@
+	
+	//just notes i took when reading slides ignore it
+	//vetor len = sqrt(x*x+y*y+z*z)
+	//cross product UxV = (uy*vz-uz*vy, uz*vx-ux*vz, ux*vy-uy*vx)
+	//unit vector = (x/len, y/len, z/len)
+	//remember the right hand rule for cross product
+	//u = ( view_dir x up_dir )/u_vector_len
+	//v = (u x view_dir)/v_vector len
+	//dont forget about the right order, view then up
+
+	//corners of viewing window
+	//aspect_ratio = width/height
+	//d can be anything?
+	//w = 2*d*tan(fov/2)
+	//h = aspect ratio of image
+	//h = w / (width/height)
+	//ul = view_origin + d*(view_dir/len) - (w/2)*u + h/2*v
+	//ur = view_origin + d*(view_dir/len) + (w/2)*u + h/2*v
+	//ll = view_origin + d*(view_dir/len) - (w/2)*u - h/2*v
+	//lr = view_origin + d*(view_dir/len) + (w/2)*u - h/2*v
+
+	//center of view window
+	//p = eye + d*(unit_vector_view_dir)
+
+	//pixel mapping
+	//delta_C_h = (ur -ul)/(2*imsize_width)
+	//delta_v_h = (ll -ul)/(2*imsize_height)
+	//delta_h = (ur-ul)/imsize_width
+	//delta_v = (ll-ul)/imsize_height
+	//to determine color at each pixel(i,j)
+	//ul+(i)*delta_h+(j)*delta_v+delta_c_h+delta_c_v
+
+	//How to define each ray
+	//view_orign is eye_xyz?
+	//dir = Pxview_origin //unit vector
+	//then we find ray
+	//ray = view_origin + t*(dir)
+	//if t=0 we are at the same place, - is behind and t>(Pxview_orign.len) means
+	//we are beyond view window
+
+	//intersection of sphere and ray
+	//t = unknown
+	//ray equation = (ray.x, ray.y, ray.z)+t*(ray.dx, ray.dy, ray.dz)
+	//x=ray.x+t*ray.dx y=... etc.
+	//sphere equation is:
+	//(x-x_c)²+(y-y_c)²+(z-z_c)² = r²
+	//put ray eq in sphere eq
+	//then we want to solve for t
+	//1. A*t²+B*t+C=0
+	//A=(ray.dx²+ray.dy²+ray.dz²)=1//since they are unit vector
+	//B=2*(ray.dx*(ray.x-sphere.x)+ray.dy*(ray.y-sphere.y)+ray.dz*(ray.z-sphere.z))
+	//C=(ray.x-sphere.x)²+(ray.z-sphere.z)²+(ray.z-sphere.z)² - sphere.r
+	//solve eq 1 with (-B(+/-)sqrt(B²-4*A*C))/2*A
+	//whats inside the sqrt is called discriminant
+	//if inside sqrt is positive then they intersect and we can see the sphere
+	//if inside sqrt =0 then we are grazing the sphere
+	//if inside sqrt is neg we missed the sphere
+
+	//later we care about the t and we want the solution that is positive and smallest

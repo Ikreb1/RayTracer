@@ -1,0 +1,7 @@
+A set of scenes to test the functionality of the ray tracer.
+
+Note these are VERY basic and just to help get started; there are many, many options left unexplored.
+
+I expect you to use your own scenes in your assignment write ups.
+
+Get creative! :]

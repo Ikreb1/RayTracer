@@ -1,0 +1,19 @@
+These input files are designed to test the functionality of shadows in the ray tracer.
+
+In every scene, the eye is located at (0, 0, 20), facing in the negative direction along the z-axis, with the up direction along the y-axis.
+A yellow sphere of radius 4 is located at (0, 0, 0), and an orange sphere of radius 1 is located at (2, 2, 10).
+
+The only variation between scenes is the single light attribute:
+1. directionallight_shadow_test1.txt contains a white directional light oriented along the vector (-1, -1, -5)
+4. pointlight_shadow_test1.txt contains a white point light located at the point (4, 4, 20)
+5. pointlight_shadow_test2.txt contains a white point light located at the point (6, 6, 30)
+6. pointlight_shadow_test3.txt contains a white point light located at the point (8, 8, 40)
+
+The object of these tests is to demonstrate how shadows are cast by directional and point lights.
+
+In all examples, the orange sphere casts a shadow on the yellow sphere.
+
+The directional light example shows the shadow cast when the light source is at infinite distance from the spheres.
+
+The point light examples show the shadow cast when the light source is at various distances from the spheres.
+As the point light moves farther away from the spheres the shadow becomes smaller and closer in appearance to the shadow cast by a directional light.

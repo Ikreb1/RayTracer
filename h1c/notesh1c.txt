@@ -1,0 +1,71 @@
+triangles:
+remember right hand rule
+v x y z
+f v1 v2 v3
+vertex start at 1
+triangle is defines by three points p0, p1, p2
+e1 = p0 -> p1;
+e2 = p0 -> p2;
+n = e1 x e2;
+Plane equation = Ax + By + Cz + D = 0
+A = n.x, B = n.y, C = n.z;
+xyz in plane equation can be substituted with any of the three points p0, p1, p2
+to solve for defines
+dont need to normalize n to unit vector
+
+then we can sub ray eq into plane eq
+ray eq: x = x0 + t*td, ...
+we get:
+t = -(A*x0 + B*y0 + C*z0 + D) / (A*xd + B*yd + C*zd)
+
+ray/plane intersection point p
+px = (x0 + t*xd);
+
+barycentric Coordinates
+any point in triangle can be defined with:
+  p = p0 + beta*e1 + gamma*e2 
+  where (beta >= 0 and beta <= 1) and (gamma >= 0 and gamma <= 1)
+  when beta + gamma > 1 we are outside
+
+area of triangle secound best approace is:
+  A = 0.5 * len(e1 x e2)
+
+ep = p - p0
+
+solve beta*e1 + gamma*e2 = ep
+beta(e1*e1) + gamma(e1*e2) = e1*ep
+beta(e2*e1) + gamma(e2*e2) = e2*ep
+
+e1 = p1 – p0 ; e2 = p2 – p0; 
+ep = p – p0 ;
+d11 = e1 × e1 ; d12 = e1 × e2 ; d22 = e2 × e2 ;
+dp1 = ep × e1 ; dp2 = ep × e2 ;
+D = d11d22 – d12d12 ;
+Db = d22dp1 – d12dp2 ;
+Dg = d11dp2 – d12dp1 ;
+beta = Db /D ; gamma = Dg /D ; alpha = 1 – (beta + gamma )
+
+a = alpha * area
+b = beta * area 
+c = gamma * area
+
+A = a + b + c
+
+dot product is ax*bx + ay*by + az*bz
+
+alpha is the check to see that 0 < beta + gamma < 1
+
+Smooth shading: 
+  n = (alpha*vn1 + beta*vn2 + gamma*vn3) / len( alpha*vn1 + beta*vn2 + gamma*vn3 )
+  then need to unitvector it
+
+  suprisingly simple
+
+Texture mapping to a sphere: 
+  xyz = ray/sphere intersection
+  x = xc + r cos theta sin phi
+  y = yc + r sin theta sin phi
+  z = zc + r cos phi
+
+  theta range 0 < theta < 2*PI
+  phi range 0 < phi < PI

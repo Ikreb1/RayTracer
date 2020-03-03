@@ -1,0 +1,12 @@
+These input files are designed to test the functionality of the ambient, diffuse, and specular coefficients - as well as the specular exponent - in the ray tracer.
+
+In every scene, the eye is located at (0, 0, 20), facing in the negative direction along the z-axis, with the up direction along the y-axis.
+A five yellow spheres of radius 4 are located at (-20, 0, -30), (-10, 0, -30), (0, 0, -30), (10, 0, -30), and (20, 0, -30); and are illuminated by a white directional light along the vector (-1, -1, -5).
+
+The only variation between scenes are the coefficients and exponent:
+1. ambientcoefficient_test.txt assigns a value of 0.0, 0.2, 0.4, 0.6, and 0.8 to the ambient coefficient of each of the spheres, respectively. The diffuse and specular coefficients are both 0.4, and the specular exponent is 50.
+2. diffusecoefficient_test.txt assigns a value of 0.0, 0.2, 0.4, 0.6, and 0.8 to the diffuse coefficient of each of the spheres, respectively. The ambient and specular coefficients are both 0.4, and the specular exponent is 50.
+3. specularcoefficient_test.txt assigns a value of 0.0, 0.2, 0.4, 0.6, and 0.8 to the specular coefficient of each of the spheres, respectively. The ambient and diffuse coefficients are both 0.4, and the specular exponent is 50.
+4. specularexponent_test.txt assigns a value of 2, 6, 10, 50, and 100 to the specular exponent of each of the spheres, respectively. The ambient, diffuse, and specular coefficients are all 0.4.
+
+The object of these tests is to demonstrate the various effects of the ambient, diffuse, and specular coefficients; and the specular exponent.

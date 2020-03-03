@@ -1,0 +1,42 @@
+Questions to ask TA or Professor:
+  for lights should I use viewdir or the direction I get from Pxview_origin? //I would gess Pxview_origin
+  how do I add multiple light sources? is it ka*Od + for each light(kd*od*(N*L)+ks*os*(N*H))?
+  Why does matcolor have os_lambda? isn't os_lambda the color of the light?
+
+  eye = (0, 0, 5) sphere center = (0, 0, 0)
+  ray direction = (0, 0, –1) sphere radius = 2
+  light direction = (0, –5, 0)
+  object’s diffuse color = (1, 0, 0)
+  object’s specular color = (1, 1, 1)
+  ka = 0.1, kd = 0.5, ks = 0.2, n = 2
+  with this input that would be:
+  eye 0.0 0.0 5.0
+  viewdir 0.0 0.0 -1.0
+  updir 0.0 1.0 0.0
+  hfov 90.0
+  imsize 3 3
+  bkgcolor 0.0 0.0 1.0
+  mtlcolor 1.0 0.0 0.0 1.0 1.0 1.0 0.1 0.5 0.2 2
+  sphere 0.0 0.0 0.0 2.0
+  I dont get anything in my image
+
+  should d just be a constant?
+
+  eye 0.0 0.0 0.0
+  viewdir 0.0 0.0 1.0
+  updir 0.0 1.0 0.0
+  hfov 90.0
+  imsize 900 900
+  bkgcolor 0.0 0.0 1.0
+  light 0.0 1.0 0.0 1 0.5 0.5 0.5
+  mtlcolor 1.0 0.0 0.0 1.0 1.0 1.0 0.2 0.2 0.2 10
+  sphere 0.0 -5.0 8.0 1.0
+  mtlcolor 1.0 1.0 0.0 1.0 1.0 1.0 0.2 0.2 0.2 10
+  sphere 0.0 5.0 7.0 1.0
+  mtlcolor 0.0 1.0 0.0 1.0 1.0 1.0 0.2 0.2 0.2 10
+  sphere 5.0 0.0 6.0 1.0
+  mtlcolor 0.0 1.0 1.0 1.0 1.0 1.0 0.5 0.5 0.5 10
+  sphere -5.0 0.0 5.0 1.0
+  mtlcolor 1.0 0.0 1.0 1.0 1.0 1.0 1.0 0.1 0.2 1
+  sphere 0.0 0.0 5.0 1.0
+  for this the light looks like its at the x axis since y is up

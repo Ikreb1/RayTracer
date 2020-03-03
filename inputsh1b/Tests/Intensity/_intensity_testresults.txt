@@ -1,0 +1,17 @@
+These input files are designed to test the functionality of light intensity in the ray tracer.
+
+In every scene, the eye is located at (0, 0, 20), facing in the negative direction along the z-axis, with the up direction along the y-axis.
+A yellow sphere of radius 4 is located at (0, 0, 0), and an orange sphere of radius 1 is located at (2, 2, 10).
+
+The only variation between scenes are the light source(s):
+1. lightintensity_test1.txt is illuminated by a single directional light of intensity (1, 1, 1) along the vector (-1, -1, -5)
+2. lightintensity_test2.txt is illuminated by three directional lights - each of intensity (1, 1, 1), along the vectors (0, 0, -5), (-1, -1, -2.5), and (-1, -1, -5), respectively
+3. lightintensity_test3.txt is illuminated by three directional lights - each of intensity (0.33, 0.33, 0.33), along the vectors (0, 0, -5), (-1, -1, -2.5), and (-1, -1, -5), respectively
+
+The object of these tests is to demonstrate the effect of light intensity.
+
+The first example establishes a base case, were the scene is iluminated by a single light source at full intensity.
+
+The second example demonstrates intensity overflow, where the scene is illuminated by mulitple light sources all at full intensity.
+
+The third example demonstrates how to combat intensity overflow, by presenting a scene illuminated by mulitple light sources (along the same vectors as the previous scene), but reducing the intensity of each light in proportion to the number of lights in the scene

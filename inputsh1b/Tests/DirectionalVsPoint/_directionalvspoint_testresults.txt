@@ -1,0 +1,20 @@
+These input files are designed to test the functionality of directional and point lights in the ray tracer.
+
+In every scene, the eye is located at (0, 0, 20), facing in the negative direction along the z-axis, with the up direction along the y-axis.
+A yellow sphere of radius 4 is located at (0, 0, 0).
+
+The only variation between scenes is the single light attribute:
+1. directionallight_test1.txt contains a white directional light oriented along the vector (0, 5, 0)
+2. directionallight_test2.txt contains a white directional light oriented along the vector (0, 10, 0)
+3. directionallight_test3.txt contains a white directional light oriented along the vector (0, 15, 0)
+4. pointlight_test1.txt contains a white point light located at the point (0, 5, 0)
+5. pointlight_test2.txt contains a white point light located at the point (0, 10, 0)
+6. pointlight_test3.txt contains a white point light located at the point (0, 15, 0)
+
+The object of these tests is to demonstrate the difference between directional and point lights.
+
+In the directional light examples, the sphere should be illuminated from directly below.
+The change in the y-value of the directional light vector between the three inputs will not change the distance of the light from the sphere and therefore the appearance of the output will be unchanged.
+
+In the point light examples, the sphere should be illuminated from directly above.
+The change in the y-value of the point light point between the three inputs changes the distance of the light from the sphere and therefore changes the appearance of the output.
