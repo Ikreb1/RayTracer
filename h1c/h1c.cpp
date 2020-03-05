@@ -35,6 +35,10 @@ struct ColorType{
   int n;
 };
 
+struct SimpleColorType {
+  double r, g, b;
+};
+
 //stores a sphere cords and color
 struct SphereType{
 	double x, y, z;
@@ -42,15 +46,25 @@ struct SphereType{
 	//index of array where color is stored
 	int m;
   //index of array where .ppm name is stored
-  string t;
+  int t;
+};
+
+struct TextureCord {
+  double u, v;
 };
 
 struct TriangleType{
   Point v1, v2, v3;
   Point vn1, vn2, vn3;
+  TextureCord vt1, vt2, vt3;
   //n counts how many values are in triangle as in v, vn, vt
   int m, t, n;
+
+  double alpha, beta, gamma;
 };
+
+
+// vector<vetor<Color> > bydudde;
 
 //vector is a resizable array to store color or sphere
 vector<SphereType> sphereList;
@@ -66,6 +80,13 @@ vector<TriangleType> triangleList;
 vector<Point> vertexNormalList;
 //list of .ppm file textures
 vector<string> textureList;
+//list of texture cordinates
+vector<TextureCord> vertexTextureList;
+
+vector<Texture> textureVector;
+
+//temporary
+SimpleColorType textureColor[133][133];
 
 //function decleration
 ColorType shadeRay(int id, int type,  Point intersect, Point dir, Point interpolatedN);
@@ -89,6 +110,9 @@ double isOutOfRange(double x);
 bool isNearlyEqual(double x, double y);
 int shadowRay(RayType shadow, int w, double d, int id, int type);
 void printDouble(double x, string s);
+ColorType toPolarCoorinateMapping(SphereType s, Point intersect);
+ColorType toPolarCoorinateMapping(TriangleType t);
+
 
 //returns color of sphere or background, type = 2 = triangle, type = 1 = sphere
 ColorType shadeRay(int id, int type,  Point intersect, Point dir, Point interpolatedN) {
@@ -97,7 +121,8 @@ ColorType shadeRay(int id, int type,  Point intersect, Point dir, Point interpol
     return colorList[0];
   }
   //extract the sphere we are calculation from the arrays
-  ColorType color;
+  ColorType color; 
+  ColorType textureColor;
   SphereType sphere;
   TriangleType triangle;
   if(type == 1) {
@@ -124,15 +149,29 @@ ColorType shadeRay(int id, int type,  Point intersect, Point dir, Point interpol
   //calc N vector outside loop for efficiency
   if(type == 1) {
     n_v = unitVector(makeAPoint((intersect.x - sphere.x)/sphere.r, (intersect.y - sphere.y)/sphere.r, (intersect.z - sphere.z)/sphere.r));
-  } else if(triangle.n != 1) {
-    p0 = triangle.v1;
-    p1 = triangle.v2;
-    p2 = triangle.v3;
-    e1 = vectorFromPoints(p0, p1);
-    e2 = vectorFromPoints(p0, p2);
-    n_v = crossProduct(e1, e2);  
+    if(sphere.t > -1) {
+      textureColor = toPolarCoorinateMapping(sphere, intersect);
+      color.odr = textureColor.odr;
+      color.odg = textureColor.odg;
+      color.odb = textureColor.odb;
+    }
   } else {
-    n_v = interpolatedN;
+    if(triangle.t > -1) {
+      textureColor = toPolarCoorinateMapping(triangle);
+      color.odr = textureColor.odr;
+      color.odg = textureColor.odg;
+      color.odb = textureColor.odb;
+    }
+    if(triangle.n != 1) {
+      p0 = triangle.v1;
+      p1 = triangle.v2;
+      p2 = triangle.v3;
+      e1 = vectorFromPoints(p0, p1);
+      e2 = vectorFromPoints(p0, p2);
+      n_v = crossProduct(e1, e2);
+    } else {
+      n_v = interpolatedN;
+    }
   }
   v = unitVector(makeAPoint(-dir.x, -dir.y, -dir.z));
   //taking ka*od outside the loop since it only needs to be done once
@@ -443,6 +482,11 @@ ColorType TraceRay(RayType ray) {
                   //adds the three vectors together and then returns unitvector of them
                   interpolatedN = unitVector(vectorAddition(vectorAddition(vn1, vn2), vn3));
                 }
+                if(tri.t > -1) {
+                  tri.beta = beta;
+                  tri.alpha = alpha;
+                  tri.gamma = gamma;
+                }
               }
             } //else cout << "gamma is not inside 0-1 gamma = " << gamma << "\n";
           } //else cout << "beta is not inside 0-1 beta = " << beta << "\n";
@@ -464,7 +508,7 @@ ColorType TraceRay(RayType ray) {
 }
 
 //changes the spheres XYZ center to polar coordinates
-SphereType toPolarCoorinateMapping(SphereType s, Point intersect) {
+ColorType toPolarCoorinateMapping(SphereType s, Point intersect) {
   //inside acos and atan needs to be in range -1, +1
   //returns -Pi to Pi rad
   double phi =  acos((intersect.z - s.z) / s.r);
@@ -475,13 +519,39 @@ SphereType toPolarCoorinateMapping(SphereType s, Point intersect) {
   //v is now 0-1
   double v = phi / M_PI;
 
-
-  double u = theta;
-  if(u < 0) u += 2*M_PI;
-  u = u  / (2*M_PI);
+  //is u correct? should be range 0-1
+  double u = (theta + M_PI)/2*M_PI;
   
-  //not sure what to do
+  int height = sizeof textureColor / sizeof textureColor[0];
+  int width = sizeof textureColor[0] / sizeof(SimpleColorType);
+
+  SimpleColorType sc = textureColor[(int)(v*(height-1))][(int)(u*(width-1))];
+  ColorType c;
+  c.odr = sc.r;
+  c.odg = sc.g;
+  c.odb = sc.b;
+    
+  return c;
 }
+
+ColorType toPolarCoorinateMapping(TriangleType t) {
+  TextureCord temp;
+  
+  double u = t.alpha * t.vt1.u + t.beta * t.vt2.u + t.gamma * t.vt3.u;
+  double v = t.alpha * t.vt1.v + t.beta * t.vt2.v + t.gamma * t.vt3.v;
+  
+  int height = sizeof textureColor / sizeof textureColor[0];
+  int width = sizeof textureColor[0] / sizeof(SimpleColorType);
+
+  SimpleColorType sc = textureColor[(int)(v*(height-1))][(int)(u*(width-1))];
+  ColorType c;
+  c.odr = sc.r;
+  c.odg = sc.g;
+  c.odb = sc.b;
+  
+  return c;
+}
+
 
 //shorthand to debug
 void printPoint(Point a, string s) {
@@ -623,6 +693,7 @@ int main(int argc, char *argv[]) {
   TriangleType triangle;
   Point vertex;
   Point vertexNormal;
+  TextureCord vertexTexture;
   Light light;
 	int matColorId = 0;
   int textureId = -1;
@@ -1072,12 +1143,29 @@ int main(int argc, char *argv[]) {
 				cout << "Invalid number " + keyword + "\n";
 				exit(1);
 			}
-      vertexNormalList.push_back(vertexNormal); 
+      vertexNormalList.push_back(vertexNormal);
+      } else if(keyword=="vt"){
+      input>>keyword;
+			try {
+			vertexTexture.u = stod(keyword);
+			} catch(...) {
+				cout << "Invalid number " + keyword + "\n";
+				exit(1);
+			}
+
+			input>>keyword;
+			try {
+			vertexTexture.v = stod(keyword);
+			} catch(...) {
+				cout << "Invalid number " + keyword + "\n";
+				exit(1);
+			}
+
+      vertexTextureList.push_back(vertexTexture); 
     } else if(keyword=="f"){
       //vertexes[i][j] i=input number, j=v/vt/vn
       int vertexes[3][3];
       int backslashes;
-      int texture = 0;
       int normal = 0;
 
       input>>keyword;
@@ -1157,7 +1245,7 @@ int main(int argc, char *argv[]) {
         exit(1);
       }
 
-      /*
+      
       for(int i=0;i<3;i++) {
         for(int j=0;j<3;j++) {
           cout << vertexes[i][j] << " ";
@@ -1177,12 +1265,26 @@ int main(int argc, char *argv[]) {
       
       //checks if value is out of range
       int size = vertexList.size()-1;
-      for(int i=0;i<3;i++) {
-        for(int j=0;j<3;j++) {
-          if((vertexes[i][j] < 0 || vertexes[i][j] > size) && vertexes[i][j] != -1) {
-            cout << "v" << i << " and value " << j << " is out of range\n";
-            exit(1);
-          }
+      for(int j=0;j<3;j++) {
+        if(vertexes[0][j] < -1 || vertexes[0][j] > size) {
+          cout << "v" << 0 << " and value " << j << " is out of range\n";
+          exit(1);
+        }
+      }
+
+      size = vertexTextureList.size()-1;
+      for(int j=0;j<3;j++) {
+        if(vertexes[1][j] < -1 || vertexes[1][j] > size) {
+          cout << "v" << 1 << " and value " << j << " is out of range\n";
+          exit(1);
+        }
+      }
+
+      size = vertexNormalList.size()-1;
+      for(int j=0;j<3;j++) {
+        if(vertexes[2][j] < -1 || vertexes[2][j] > size) {
+          cout << "v" << 2 << " and value " << j << " is out of range\n";
+          exit(1);
         }
       }
 			
@@ -1190,22 +1292,19 @@ int main(int argc, char *argv[]) {
 			triangle.v2 = vertexList[vertexes[1][0]];
 			triangle.v3 = vertexList[vertexes[2][0]];
       if(vertexes[0][2] != -1) {
-        triangle.vn1 = vertexList[vertexes[0][2]];
-        triangle.vn2 = vertexList[vertexes[1][2]];
-        triangle.vn3 = vertexList[vertexes[2][2]];
+        triangle.vn1 = vertexNormalList[vertexes[0][2]];
+        triangle.vn2 = vertexNormalList[vertexes[1][2]];
+        triangle.vn3 = vertexNormalList[vertexes[2][2]];
         normal++;
       }
       if(vertexes[0][1] != -1) {
-        /*
-        triangle.vt1 = vertexList[vertexes[0][1]];
-        triangle.vt2 = vertexList[vertexes[1][1]];
-        triangle.vt3 = vertexList[vertexes[2][1]];
-        */
-        texture++;
+        triangle.vt1 = vertexTextureList[vertexes[0][1]];
+        triangle.vt2 = vertexTextureList[vertexes[1][1]];
+        triangle.vt3 = vertexTextureList[vertexes[2][1]];
       }
 
       triangle.n = normal;
-      triangle.t = texture;
+      triangle.t = textureId;
       triangle.m = matColorId;
       triangleList.push_back(triangle);
     } else if(keyword == "texture") {
@@ -1217,12 +1316,56 @@ int main(int argc, char *argv[]) {
       exit(1);
 		}    
 	}
-
+  input.close();
 	//checks for parallel of up and view_dir
 	if(up.x==viewdir.x&&up.y==viewdir.y&&up.z==viewdir.z) {
 		cout << "viewdir and up can not be parallel\n";
 		exit(1);
 	}
+
+  //read in texture input files, temp only for one
+  ifstream texture;
+  int textureNum, textureHeight, textureWidth;
+	texture.open("./" + textureList[0]);
+	if(!texture) {
+		cerr << "Unable to open file "+textureList[0]+"\n";
+		exit(1);
+	}
+
+  texture>>keyword;
+  if(keyword != "P3") {
+    cout << "texture file isn't formated as a P3 file";
+    exit(1);
+  }
+
+  texture>>textureWidth;
+
+  texture>>textureHeight;
+  texture>>textureNum;
+  if(textureNum != 255) {
+    cout << textureList[0] << ".ppm file should be a 255 value format it is: " << textureNum << "\n";
+    exit(1);
+  }
+
+  //SimpleColorType textureColor[textureHeight][textureWidth];
+  //vector<SimpleColorType **> bruh;
+  //bruh.push_back(textureColor **);
+  
+  SimpleColorType textureBro;
+  for(int i=0;i<textureHeight;i++) {
+    for(int j=0;j<textureWidth;j++) {
+        texture>>textureNum;
+        textureBro.r = textureNum;
+        texture>>textureNum;
+        textureBro.g = textureNum;
+        texture>>textureNum;
+        textureBro.b = textureNum;
+        textureColor[i][j] = textureBro;
+    }
+  }
+  //cout << bruh[0][0][0].r << "\n";
+  texture.close();
+
 	ofstream output;
 	output.open("output.ppm", ios::out | ios::trunc);
 	if(!output.is_open()) {
