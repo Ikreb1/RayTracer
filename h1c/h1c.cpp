@@ -63,7 +63,10 @@ struct TriangleType{
   double alpha, beta, gamma;
 };
 
-
+struct TextureMapVector {
+  int height, width;
+  vector<vector<SimpleColorType> > v;
+};
 // vector<vetor<Color> > bydudde;
 
 //vector is a resizable array to store color or sphere
@@ -83,10 +86,8 @@ vector<string> textureList;
 //list of texture cordinates
 vector<TextureCord> vertexTextureList;
 
-vector<Texture> textureVector;
+vector<TextureMapVector> textureVector;
 
-//temporary
-SimpleColorType textureColor[133][133];
 
 //function decleration
 ColorType shadeRay(int id, int type,  Point intersect, Point dir, Point interpolatedN);
@@ -121,6 +122,7 @@ ColorType shadeRay(int id, int type,  Point intersect, Point dir, Point interpol
     return colorList[0];
   }
   //extract the sphere we are calculation from the arrays
+  
   ColorType color; 
   ColorType textureColor;
   SphereType sphere;
@@ -150,6 +152,7 @@ ColorType shadeRay(int id, int type,  Point intersect, Point dir, Point interpol
   if(type == 1) {
     n_v = unitVector(makeAPoint((intersect.x - sphere.x)/sphere.r, (intersect.y - sphere.y)/sphere.r, (intersect.z - sphere.z)/sphere.r));
     if(sphere.t > -1) {
+      
       textureColor = toPolarCoorinateMapping(sphere, intersect);
       color.odr = textureColor.odr;
       color.odg = textureColor.odg;
@@ -307,7 +310,7 @@ int shadowRay(RayType shadow, int w, double distance, int id, int type) {
           alpha = 1.0 - (beta + gamma);
           
           if(!isNearlyEqual(alpha + beta + gamma, 1)) {
-            cout << "shadow: not right since alpha + beta + gamma = " << alpha + gamma + beta << "\n";
+            //cout << "shadow: not right since alpha + beta + gamma = " << alpha + gamma + beta << "\n";
           }
 
           //checks if alpha, beta and gamma all are in the range 0-1 and does rounding errors aswell
@@ -340,6 +343,7 @@ int shadowRay(RayType shadow, int w, double distance, int id, int type) {
 
 //calcs if there is an intersection. doesn't work i think
 ColorType TraceRay(RayType ray) {
+  
 	Point intersectionPoint;
 	Point dir;
   //make ray.dx be the correct thing that is the direction of the eye at x pixel point
@@ -483,9 +487,10 @@ ColorType TraceRay(RayType ray) {
                   interpolatedN = unitVector(vectorAddition(vectorAddition(vn1, vn2), vn3));
                 }
                 if(tri.t > -1) {
-                  tri.beta = beta;
-                  tri.alpha = alpha;
-                  tri.gamma = gamma;
+                  
+                  triangleList[i].beta = beta;
+                  triangleList[i].alpha = alpha;
+                  triangleList[i].gamma = gamma;
                 }
               }
             } //else cout << "gamma is not inside 0-1 gamma = " << gamma << "\n";
@@ -513,37 +518,46 @@ ColorType toPolarCoorinateMapping(SphereType s, Point intersect) {
   //returns -Pi to Pi rad
   double phi =  acos((intersect.z - s.z) / s.r);
   //returns -PI/2, PI/2 rad
+
   double theta = atan2((intersect.y - s.y), (intersect.x - s.x));
   //acos returns values in -Pi to Pi rad not 0 - PI see slides 92
   
   //v is now 0-1
   double v = phi / M_PI;
-
   //is u correct? should be range 0-1
-  double u = (theta + M_PI)/2*M_PI;
+  double u = (theta + M_PI)/(2*M_PI);
+  int height = (textureVector[s.t].height) - 1;
+  int width = (textureVector[s.t].width) - 1;
+  int placementv = (int) (v*height);
+  int placementu = (int) (u*width);
+  //cout << placementu << " " << placementv << "\n";
   
-  int height = sizeof textureColor / sizeof textureColor[0];
-  int width = sizeof textureColor[0] / sizeof(SimpleColorType);
-
-  SimpleColorType sc = textureColor[(int)(v*(height-1))][(int)(u*(width-1))];
+  SimpleColorType sc = textureVector[s.t].v.at(placementv).at(placementu);
+  //cout << u << ": u " << v << ":v \n";
+  //cout << sc.r << " " << sc.b << " " << sc.g << "\n";
   ColorType c;
   c.odr = sc.r;
   c.odg = sc.g;
   c.odb = sc.b;
-    
+  //cout << c.odr << " " << c.odb << " " << c.odg << "\n";
   return c;
 }
 
 ColorType toPolarCoorinateMapping(TriangleType t) {
   TextureCord temp;
-  
+  //cout << t.alpha << " " << t.vt1.u << "\n";
   double u = t.alpha * t.vt1.u + t.beta * t.vt2.u + t.gamma * t.vt3.u;
   double v = t.alpha * t.vt1.v + t.beta * t.vt2.v + t.gamma * t.vt3.v;
   
-  int height = sizeof textureColor / sizeof textureColor[0];
-  int width = sizeof textureColor[0] / sizeof(SimpleColorType);
+  //cout << u << " " << v << "\n";
 
-  SimpleColorType sc = textureColor[(int)(v*(height-1))][(int)(u*(width-1))];
+  int height = textureVector[t.t].height - 1;
+  int width = textureVector[t.t].width - 1;
+  int placementv = (int) (v*height);
+  int placementu = (int) (u*width);
+  //cout << placementu << " " << placementv << "\n";
+  SimpleColorType sc = textureVector[t.t].v.at(placementu).at(placementv);
+  
   ColorType c;
   c.odr = sc.r;
   c.odg = sc.g;
@@ -681,7 +695,6 @@ Point rayEquationVector(RayType ray, double t) {
 // complier command: gcc h1a.cpp -o h1a -lm -lstdc++
 int main(int argc, char *argv[]) {
 	//takes in name of input and output file
-
 	//variable decleration
 	string inputFileName="";
 	string outputFileName="";
@@ -727,7 +740,6 @@ int main(int argc, char *argv[]) {
 	double d;
 
   Point tempPoint;
-
 	cin>>inputFileName;
 	outputFileName = inputFileName;	
   //outputFileName = "output"
@@ -739,7 +751,6 @@ int main(int argc, char *argv[]) {
 		cerr << "Unable to open file "+inputFileName+"\n";
 		exit(1);
 	}
-
   //reads inputs and initializes them correctly and checks for errors
   while(input>>keyword) {
 		if(keyword=="eye"){
@@ -1245,7 +1256,7 @@ int main(int argc, char *argv[]) {
         exit(1);
       }
 
-      
+      /*
       for(int i=0;i<3;i++) {
         for(int j=0;j<3;j++) {
           cout << vertexes[i][j] << " ";
@@ -1266,7 +1277,7 @@ int main(int argc, char *argv[]) {
       //checks if value is out of range
       int size = vertexList.size()-1;
       for(int j=0;j<3;j++) {
-        if(vertexes[0][j] < -1 || vertexes[0][j] > size) {
+        if(vertexes[j][0] < -1 || vertexes[j][0] > size) {
           cout << "v" << 0 << " and value " << j << " is out of range\n";
           exit(1);
         }
@@ -1274,15 +1285,16 @@ int main(int argc, char *argv[]) {
 
       size = vertexTextureList.size()-1;
       for(int j=0;j<3;j++) {
-        if(vertexes[1][j] < -1 || vertexes[1][j] > size) {
+        if(vertexes[j][1] < -1 || vertexes[j][1] > size) {
           cout << "v" << 1 << " and value " << j << " is out of range\n";
+          cout << vertexes[j][1] << "\n";
           exit(1);
         }
       }
 
       size = vertexNormalList.size()-1;
       for(int j=0;j<3;j++) {
-        if(vertexes[2][j] < -1 || vertexes[2][j] > size) {
+        if(vertexes[j][2] < -1 || vertexes[j][2] > size) {
           cout << "v" << 2 << " and value " << j << " is out of range\n";
           exit(1);
         }
@@ -1302,7 +1314,6 @@ int main(int argc, char *argv[]) {
         triangle.vt2 = vertexTextureList[vertexes[1][1]];
         triangle.vt3 = vertexTextureList[vertexes[2][1]];
       }
-
       triangle.n = normal;
       triangle.t = textureId;
       triangle.m = matColorId;
@@ -1323,48 +1334,58 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-  //read in texture input files, temp only for one
-  ifstream texture;
-  int textureNum, textureHeight, textureWidth;
-	texture.open("./" + textureList[0]);
-	if(!texture) {
-		cerr << "Unable to open file "+textureList[0]+"\n";
-		exit(1);
-	}
 
-  texture>>keyword;
-  if(keyword != "P3") {
-    cout << "texture file isn't formated as a P3 file";
-    exit(1);
-  }
-
-  texture>>textureWidth;
-
-  texture>>textureHeight;
-  texture>>textureNum;
-  if(textureNum != 255) {
-    cout << textureList[0] << ".ppm file should be a 255 value format it is: " << textureNum << "\n";
-    exit(1);
-  }
-
-  //SimpleColorType textureColor[textureHeight][textureWidth];
-  //vector<SimpleColorType **> bruh;
-  //bruh.push_back(textureColor **);
-  
-  SimpleColorType textureBro;
-  for(int i=0;i<textureHeight;i++) {
-    for(int j=0;j<textureWidth;j++) {
-        texture>>textureNum;
-        textureBro.r = textureNum;
-        texture>>textureNum;
-        textureBro.g = textureNum;
-        texture>>textureNum;
-        textureBro.b = textureNum;
-        textureColor[i][j] = textureBro;
+  for(int i=0;i<textureList.size();i++) {
+    //read in texture input files, temp only for one
+    ifstream texture;
+    TextureMapVector textureMapVector;
+    texture.open("./" + textureList[i]);
+    if(!texture) {
+      cerr << "Unable to open file "+textureList[0]+"\n";
+      exit(1);
     }
+
+    texture>>keyword;
+    if(keyword != "P3") {
+      cout << "texture file isn't formated as a P3 file";
+      exit(1);
+    }
+
+    texture>>keyword;
+    textureMapVector.width = stoi(keyword);
+
+    texture>>keyword;
+    textureMapVector.height = stoi(keyword);
+    texture>>keyword;
+    if(stoi(keyword) != 255) {
+      cout << textureList[0] << ".ppm file should be a 255 value format it is: " << keyword << "\n";
+      exit(1);
+    }
+
+    //SimpleColorType textureColor[textureHeight][textureWidth];
+    //vector<SimpleColorType **> bruh;
+    //bruh.push_back(textureColor **);
+    
+    
+    SimpleColorType simpleColor;
+    vector<SimpleColorType> colorVector;
+    for(int i=0;i<textureMapVector.height;i++) {
+      for(int j=0;j<textureMapVector.width;j++) {
+          texture>>keyword;
+          simpleColor.r = stod(keyword)/255;
+          texture>>keyword;
+          simpleColor.g = stod(keyword)/255;
+          texture>>keyword;
+          simpleColor.b = stod(keyword)/255;
+          colorVector.push_back(simpleColor);
+      }
+      textureMapVector.v.push_back(colorVector);
+      colorVector.clear();
+    }
+    textureVector.push_back(textureMapVector);
+    textureMapVector.v.clear();
+    texture.close();
   }
-  //cout << bruh[0][0][0].r << "\n";
-  texture.close();
 
 	ofstream output;
 	output.open("output.ppm", ios::out | ios::trunc);
@@ -1443,9 +1464,11 @@ int main(int argc, char *argv[]) {
 	currentPixelPlace.ox = eye.x;
 	currentPixelPlace.oy = eye.y;
 	currentPixelPlace.oz = eye.z;
+
+
 	//for each pixel we calculate points place in view and then run traceray to find what color is needed and
 	//then fill in the output image with the correct rgb values
- 	for(int h=0;h<height;h++) {
+  for(int h=0;h<height;h++) {
 		for(int j=0;j<width;j++) {
 			currentPixelPlace.dx = ul.x + j*deltah.x + h*deltav.x + deltach.x+deltacv.x;
 			currentPixelPlace.dy = ul.y + j*deltah.y + h*deltav.y + deltach.y+deltacv.y;
