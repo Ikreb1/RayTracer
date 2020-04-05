@@ -1,0 +1,6 @@
+Questions to ask TA or Professor:
+  sanity check doesnt work? but my program is nice
+  should i store each pixel from the ppm files in my program? since its a couple of mb
+  how to limit phi = acos(x) to range -1 to 1 
+  can I give my self that the .ppm texture files have the right numbers and format?
+  

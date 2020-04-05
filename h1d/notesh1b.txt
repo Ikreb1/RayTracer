@@ -1,0 +1,59 @@
+w=1 point light
+mtlcolor Odr Odg Odb Osr Osg Osb ka kd ks n
+light x y z w r g b
+light 0.0 7.0 0.0 1 0.2 0.2 0.2
+
+basic blinn-Phong illumination equation
+I_lambda = k_a * Od_lambda + k_d * Od_lambda * Max(0,(N_v dotproduct L_v)) 
+  + k_s*Os_lambda*max(0, (N_v dotproduct H_v))^n
+
+I_lambda <= 1
+
+a dotproduct b = ||a||||b||cos(theta) = a1*b1 + a2*b2 + a3*b3
+
+N_v = orientaion of the surface, unit vector
+N_v = [(xi, yi, zi) - (xc, yc, zc)]/r
+(xi, yi, zi) = ray sphere intersection point
+(xc, yc, zc) = sphere center
+
+L_v = direction to the light, unit vector
+points away from surface and towards light source
+if point light is from ray/surface intersection towards light location
+else if directional light points the opposite direction of directional light
+
+//only needs to be computed once
+for directional light L = (-lightx, -lighty, -lightz)/||lightx,lighty,lightz||
+
+//point light 
+L for point light = 
+(light_position-surface_posistion)/||light_position-surface_posistion||
+
+V_v = direction of the viewer
+//when raycasting(only), this will be the same as -view_dir or w
+vector dir in TraceRay function i think
+
+H_v = depends on V_v and L_v
+H_v = ( (L_v + V_v) ) / ||(L_v + V_v)||
+
+compute k_d*(N_v dotproduct L_v) and k_s*(N_v dotproduct H_v)^n ones for each rgb
+
+k_a = ambient term: reflection of indirect light;
+k_d = diffuse term: reflection of light from lightsource (matte)
+k_s = specular term: mirror reflection light
+
+shadows:
+shadow.ox = ray/sphere intersection
+if directional
+shadow.dx = -unitvector(light)
+if point: 
+shadow.dx = unitvector(light-(ray/sphere intersection))
+
+if directional:
+  any ray/obj intersection that return positive distance
+if point:
+  only intersection dist is 0<t and pointDist>t 
+Ignore yourself(sphere)
+
+1a was Od_lambda
+
+spotlights are also talked about 
